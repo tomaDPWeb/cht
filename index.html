@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat OpenAI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0; padding: 1rem;
+      background: #f9f9f9;
+    }
+    #chatDisplay {
+      height: 60vh;
+      overflow-y: auto;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+    #inputWrapper {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #inputText {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chat cu GPT-3.5</h1>
+  <div id="chatDisplay"></div>
+  <div id="inputWrapper">
+    <input type="text" id="inputText" placeholder="Scrie un mesaj..." />
+    <button onclick="trimiteMesaj()">Trimite</button>
+  </div>
+
+  <script>
+    const chatDisplay = document.getElementById("chatDisplay");
+    const inputText = document.getElementById("inputText");
+
+    async function trimiteMesaj() {
+      const mesaj = inputText.value.trim();
+      if (!mesaj) return;
+
+      adaugaMesaj("Tu", mesaj);
+      inputText.value = "";
+
+      const raspuns = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mesaj })
+      });
+
+      const result = await raspuns.json();
+      if (result.raspuns) {
+        adaugaMesaj("GPT", result.raspuns);
+      } else {
+        adaugaMesaj("Eroare", JSON.stringify(result));
+      }
+    }
+
+    function adaugaMesaj(sender, mesaj) {
+      const ts = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+      chatDisplay.innerText += `[${ts}] ${sender}: ${mesaj}\n\n`;
+      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
+  </script>
+</body>
+</html>
