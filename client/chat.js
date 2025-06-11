@@ -47,7 +47,14 @@ function adaugaMesaj(autor, text, timestamp = null) {
 
   if (timestamp) {
     const date = new Date(timestamp);
-    const ora = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const ora = date.toLocaleString([], {
+	  day: '2-digit',
+	  month: '2-digit',
+	  year: 'numeric',
+	  hour: '2-digit',
+	  minute: '2-digit'
+	});
+
     mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${text}`;
   } else {
     mesajDiv.textContent = text;
@@ -108,7 +115,14 @@ async function incarcaMesajeVechi() {
     const autor = msg.text_type === "sent" ? "user" : "gpt";
     const mesajDiv = document.createElement("div");
     mesajDiv.className = `message ${autor === "user" ? "user-message" : "gpt-message"}`;
-    const ora = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const ora = new Date(msg.created_at).toLocaleString([], {
+	  day: '2-digit',
+	  month: '2-digit',
+	  year: 'numeric',
+	  hour: '2-digit',
+	  minute: '2-digit'
+	});
+
     mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${msg.text}`;
     chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
   }
