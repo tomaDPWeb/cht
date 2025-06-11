@@ -91,7 +91,7 @@ async function incarcaMesajeInitiale() {
     adaugaMesaj(autor, msg.text, msg.created_at);
   }
 
-  if (data.length > 0) lastTimestamp = data[0].created_at;
+  if (data.length > 0) lastTimestamp = data[data.length - 1].created_at;
 }
 
 async function incarcaMesajeVechi() {
@@ -101,7 +101,7 @@ async function incarcaMesajeVechi() {
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
   let data = await raspuns.json();
 
-  // ✅ La fel, inversăm și aici dacă vine descrescător
+  // ✅ Inversăm datele pentru afișare cronologică
   data = data.reverse();
 
   for (const msg of data) {
