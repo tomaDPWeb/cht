@@ -87,18 +87,22 @@ async function incarcaMesajeVechi() {
 
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
   const data = await raspuns.json();
+
   const grupate = grupeazaMesaje(data);
-  for (const msg of grupate.reverse()) {
+  for (let i = grupate.length - 1; i >= 0; i--) {
+    const msg = grupate[i];
     const mesajDiv = document.createElement("div");
     mesajDiv.className = `message ${msg.text_type === "sent" ? "user-message" : "gpt-message"}`;
     mesajDiv.textContent = msg.text;
     chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
   }
+
   if (data.length > 0) {
     lastTimestamp = data[0].created_at;
   }
   loadingOlder = false;
 }
+
 
 function grupeazaMesaje(lista) {
   const result = [];
