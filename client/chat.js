@@ -142,33 +142,21 @@ async function actiuneButonC() {
   if (!ultimeMesaje.length) return;
   const ultimText = ultimeMesaje[ultimeMesaje.length - 1].innerText;
 
-  const raspuns = await fetch("/api/extractJson", {
+  const prompt = `Formatează în JSON următorul text:
+"""
+${ultimText}
+"""
+Structura: { "data": "YYYY-MM-DD", "id_masa": "mic_dejun", "kcal": 0, "proteina": 0 }`;
+
+  const raspuns = await fetch("/api/sendMessage", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: ultimText })
+    body: JSON.stringify({ mesaj: prompt })
   });
 
   const rezultat = await raspuns.json();
   adaugaMesaj("gpt", rezultat.raspuns, new Date().toISOString());
 }
 
-async function actiuneButonD() {
-  const toateMesajele = [...document.querySelectorAll(".gpt-message")];
-  if (!toateMesajele.length) return;
-
-  const ultimJSON = toateMesajele[toateMesajele.length - 1].innerText;
-  const trimis = await fetch("/api/saveJson", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ json: ultimJSON })
-  });
-
-  const rezultat = await trimis.json();
-  if (rezultat.success) {
-    alert("JSON salvat în coloana json_validat ✔");
-  } else {
-    alert("Eroare: " + rezultat.error);
-  }
-}
 
 window.trimiteMesaj = trimiteMesaj;
