@@ -1,12 +1,5 @@
-// ✅ FILE: chat.js
 const chatDisplay = document.getElementById("chatDisplay");
 const inputText = document.getElementById("inputText");
-
-document.addEventListener("DOMContentLoaded", () => {
-  const zonaButoane = document.getElementById("zonaButoane");
-  incarcaMesajeInitiale();
-  creeazaButoaneActiune(zonaButoane);
-});
 
 let lastTimestamp = null;
 let loadingOlder = false;
@@ -17,8 +10,11 @@ inputText.addEventListener("input", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btn-trimite").addEventListener("click", trimiteMesaj);
+  document.getElementById("btn-mai-vechi").addEventListener("click", incarcaMesajeVechi);
+  document.getElementById("btn-C").addEventListener("click", actiuneButonC);
+  document.getElementById("btn-D").addEventListener("click", () => {});
   incarcaMesajeInitiale();
-  creeazaButoaneActiune();
 });
 
 async function trimiteMesaj() {
@@ -123,34 +119,12 @@ async function incarcaMesajeVechi() {
   loadingOlder = false;
 }
 
-function creeazaButoaneActiune(zonaButoane) {
-  const butoane = [
-    { label: "Trimite", id: "btn-trimite", actiune: trimiteMesaj },
-    { label: "⬆ Mai vechi", id: "btn-mai-vechi", actiune: incarcaMesajeVechi },
-    { label: "C", id: "btn-C", actiune: actiuneButonC },
-    { label: "D", id: "btn-D", actiune: () => {} }
-  ];
-
-  for (const btnInfo of butoane) {
-    const btn = document.createElement("button");
-    btn.textContent = btnInfo.label;
-    btn.id = btnInfo.id;
-    btn.addEventListener("click", btnInfo.actiune);
-    zonaButoane.appendChild(btn);
-  }
-}
-
-
 async function actiuneButonC() {
   const ultimeMesaje = [...document.querySelectorAll(".gpt-message")];
   if (!ultimeMesaje.length) return;
   const ultimText = ultimeMesaje[ultimeMesaje.length - 1].innerText;
 
-  const prompt = `Formatează în JSON următorul text:
-"""
-${ultimText}
-"""
-Structura: { "data": "YYYY-MM-DD", "id_masa": "mic_dejun", "kcal": 0, "proteina": 0 }`;
+  const prompt = `Formatează în JSON următorul text:\n\"\"\"\n${ultimText}\n\"\"\"\nStructura: { "data": "YYYY-MM-DD", "id_masa": "mic_dejun", "kcal": 0, "proteina": 0 }`;
 
   const raspuns = await fetch("/api/sendMessage", {
     method: "POST",
@@ -161,6 +135,5 @@ Structura: { "data": "YYYY-MM-DD", "id_masa": "mic_dejun", "kcal": 0, "proteina"
   const rezultat = await raspuns.json();
   adaugaMesaj("gpt", rezultat.raspuns, new Date().toISOString());
 }
-
 
 window.trimiteMesaj = trimiteMesaj;
