@@ -2,22 +2,22 @@
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <title>GPT Chat</title>
+  <title>GPT VERCEL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --user-bg: #dceeff; /* bleu foarte deschis */
-      --gpt-bg: #f0f0f0;  /* gri foarte deschis */
+      --user-bg: #dceeff;
+      --gpt-bg: #f0f0f0;
     }
 
     body {
       margin: 0;
       padding: 0;
       font-family: system-ui, sans-serif;
+      background: #fafafa;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: #fafafa;
     }
 
     header {
@@ -27,6 +27,7 @@
       padding: 0.75rem;
       font-size: 1.3rem;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     #chatDisplay {
@@ -36,6 +37,9 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .message {
@@ -56,20 +60,35 @@
       align-self: flex-start;
     }
 
+    .typing-indicator {
+      font-style: italic;
+      color: #888;
+      font-size: 0.9rem;
+      padding-left: 0.5rem;
+    }
+
     #inputWrapper {
       display: flex;
+      gap: 0.5rem;
       padding: 0.75rem;
       border-top: 1px solid #ddd;
       background: #fff;
+      flex-shrink: 0;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     #inputText {
       flex: 1;
-      padding: 0.5rem;
       font-size: 1rem;
+      padding: 0.5rem;
       border-radius: 6px;
       border: 1px solid #ccc;
-      margin-right: 0.5rem;
+      resize: none;
+      min-height: 2.5rem;
+      max-height: 7.5rem;
+      overflow-y: auto;
     }
 
     button {
@@ -98,12 +117,12 @@
   </style>
 </head>
 <body>
-  <header>💬 GPT Chat</header>
+  <header>💬 GPT VERCEL</header>
 
   <div id="chatDisplay"></div>
 
   <div id="inputWrapper">
-    <input type="text" id="inputText" placeholder="Scrie un mesaj..." />
+    <textarea id="inputText" placeholder="Scrie un mesaj..." rows="2"></textarea>
     <button onclick="trimiteMesaj()">Trimite</button>
   </div>
 
@@ -111,18 +130,27 @@
     const chatDisplay = document.getElementById("chatDisplay");
     const inputText = document.getElementById("inputText");
 
+    inputText.addEventListener("input", () => {
+      inputText.style.height = "auto";
+      inputText.style.height = Math.min(inputText.scrollHeight, 120) + "px";
+    });
+
     async function trimiteMesaj() {
       const mesaj = inputText.value.trim();
       if (!mesaj) return;
 
       adaugaMesaj("user", mesaj);
       inputText.value = "";
+      inputText.style.height = "2.5rem";
+      adaugaTyping();
 
       const raspuns = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mesaj })
       });
+
+      stergeTyping();
 
       const result = await raspuns.json();
       if (result.raspuns) {
@@ -138,6 +166,20 @@
       mesajDiv.textContent = text;
       chatDisplay.appendChild(mesajDiv);
       chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
+
+    function adaugaTyping() {
+      const typing = document.createElement("div");
+      typing.className = "typing-indicator";
+      typing.id = "typing";
+      typing.textContent = "GPT scrie...";
+      chatDisplay.appendChild(typing);
+      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
+
+    function stergeTyping() {
+      const typing = document.getElementById("typing");
+      if (typing) typing.remove();
     }
   </script>
 </body>
