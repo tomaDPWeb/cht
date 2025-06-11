@@ -102,7 +102,7 @@ async function incarcaMesajeVechi() {
   let data = await raspuns.json();
 
   // ✅ Inversăm datele pentru afișare cronologică
-  data = data.reverse();
+  //data = data.reverse();
 
   for (const msg of data) {
     const autor = msg.text_type === "sent" ? "user" : "gpt";
