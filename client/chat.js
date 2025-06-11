@@ -64,16 +64,7 @@ function stergeTyping() {
 function creeazaButonLoadMore() {
   const btn = document.createElement("button");
   btn.textContent = "⬆ Mai vechi";
-  btn.style.position = "fixed";
-  btn.style.left = "1rem";
-  btn.style.top = "1rem";
-  btn.style.zIndex = "1000";
-  btn.style.padding = "0.5rem 1rem";
-  btn.style.borderRadius = "8px";
-  btn.style.border = "none";
-  btn.style.backgroundColor = "#ccc";
-  btn.style.cursor = "pointer";
-
+  btn.className = "load-more";
   btn.addEventListener("click", incarcaMesajeVechi);
   document.body.appendChild(btn);
 }
@@ -81,7 +72,8 @@ function creeazaButonLoadMore() {
 async function incarcaMesajeInitiale() {
   const raspuns = await fetch("/api/loadMessages");
   const data = await raspuns.json();
-  for (const msg of data) {
+  const grupate = grupeazaMesaje(data);
+  for (const msg of grupate) {
     adaugaMesaj(msg.text_type === "sent" ? "user" : "gpt", msg.text);
   }
   if (data.length > 0) {
@@ -95,7 +87,8 @@ async function incarcaMesajeVechi() {
 
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
   const data = await raspuns.json();
-  for (const msg of data) {
+  const grupate = grupeazaMesaje(data);
+  for (const msg of grupate.reverse()) {
     const mesajDiv = document.createElement("div");
     mesajDiv.className = `message ${msg.text_type === "sent" ? "user-message" : "gpt-message"}`;
     mesajDiv.textContent = msg.text;
@@ -105,4 +98,19 @@ async function incarcaMesajeVechi() {
     lastTimestamp = data[0].created_at;
   }
   loadingOlder = false;
+}
+
+function grupeazaMesaje(lista) {
+  const result = [];
+  for (let i = 0; i < lista.length; i += 2) {
+    const a = lista[i], b = lista[i + 1];
+    if (!b) {
+      result.push(a);
+    } else if (a.text_type === "sent") {
+      result.push(a, b);
+    } else {
+      result.push(b, a);
+    }
+  }
+  return result;
 }
