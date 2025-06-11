@@ -122,8 +122,8 @@ function creeazaButoaneActiune() {
   const butoane = [
     { label: "Trimite", id: "btn-trimite", actiune: trimiteMesaj },
     { label: "⬆ Mai vechi", id: "btn-mai-vechi", actiune: incarcaMesajeVechi },
-    { label: "C", id: "btn-C", actiune: () => {} },
-    { label: "D", id: "btn-D", actiune: () => {} }
+    { label: "C", id: "btn-C", actiune: actiuneButonC },
+    { label: "D", id: "btn-D", actiune: actiuneButonD }
   ];
 
   for (const btnInfo of butoane) {
@@ -132,6 +132,42 @@ function creeazaButoaneActiune() {
     btn.id = btnInfo.id;
     btn.addEventListener("click", btnInfo.actiune);
     zonaButoane.appendChild(btn);
+  }
+}
+
+
+
+async function actiuneButonC() {
+  const ultimeMesaje = [...document.querySelectorAll(".gpt-message")];
+  if (!ultimeMesaje.length) return;
+  const ultimText = ultimeMesaje[ultimeMesaje.length - 1].innerText;
+
+  const raspuns = await fetch("/api/extractJson", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: ultimText })
+  });
+
+  const rezultat = await raspuns.json();
+  adaugaMesaj("gpt", rezultat.raspuns, new Date().toISOString());
+}
+
+async function actiuneButonD() {
+  const toateMesajele = [...document.querySelectorAll(".gpt-message")];
+  if (!toateMesajele.length) return;
+
+  const ultimJSON = toateMesajele[toateMesajele.length - 1].innerText;
+  const trimis = await fetch("/api/saveJson", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ json: ultimJSON })
+  });
+
+  const rezultat = await trimis.json();
+  if (rezultat.success) {
+    alert("JSON salvat în coloana json_validat ✔");
+  } else {
+    alert("Eroare: " + rezultat.error);
   }
 }
 

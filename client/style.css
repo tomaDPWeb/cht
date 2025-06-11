@@ -89,7 +89,6 @@ button:hover {
   background-color: #2980b9;
 }
 
-/* Buton „Mai vechi” sticky */
 button.load-more {
   position: fixed;
   left: 1rem;
@@ -102,7 +101,6 @@ button.load-more {
   cursor: pointer;
 }
 
-/* Zona cu butoanele de jos */
 #zonaButoane {
   display: flex;
   justify-content: space-around;
@@ -130,25 +128,7 @@ header {
   font-weight: bold;
 }
 
-/* Responsivitate pentru mobil */
-@media (max-width: 650px) {
-  #inputText {
-    font-size: 1rem;
-  }
-
-  button {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-  }
-
-  button.load-more {
-    left: auto;
-    right: 1rem;
-    bottom: 1rem;
-    top: auto;
-    background-color: #aaa;
-  }
-
+@media (max-width: 600px) {
   #zonaButoane {
     flex-direction: row;
     flex-wrap: nowrap;
