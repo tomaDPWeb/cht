@@ -91,7 +91,7 @@ async function incarcaMesajeInitiale() {
     adaugaMesaj(autor, msg.text, msg.created_at);
   }
 
-  if (data.length > 0) lastTimestamp = data[data.length - 1].created_at;
+  if (data.length > 0) lastTimestamp = data[0].created_at;
 }
 
 async function incarcaMesajeVechi() {
@@ -113,7 +113,7 @@ async function incarcaMesajeVechi() {
     chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
   }
 
-  if (data.length > 0) lastTimestamp = data[0].created_at;
+  if (data.length > 0) lastTimestamp = data[data.length - 1].created_at;
   loadingOlder = false;
 }
 
