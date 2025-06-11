@@ -82,15 +82,13 @@ function creeazaButonLoadMore() {
 async function incarcaMesajeInitiale() {
   const raspuns = await fetch("/api/loadMessages");
   const data = await raspuns.json();
-  const grupate = grupeazaMesaje(data);
 
-   for (let i = grupate.length - 1; i >= 0; i--) {
-     const grup = grupate[i];
-     adaugaMesaj("user", grup.sent.text, grup.sent.created_at);
-     adaugaMesaj("gpt", grup.response.text, grup.response.created_at);
-   }
+  for (const msg of data) {
+    const autor = msg.text_type === "sent" ? "user" : "gpt";
+    adaugaMesaj(autor, msg.text, msg.created_at);
+  }
 
-  if (data.length > 0) lastTimestamp = data[0].created_at;
+  if (data.length > 0) lastTimestamp = data[data.length - 1].created_at;
 }
 
 async function incarcaMesajeVechi() {

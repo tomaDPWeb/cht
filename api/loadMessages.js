@@ -12,8 +12,8 @@ export default async function handler(req, res) {
   let query = supabase
     .from('chat_messages')
     .select('id, text, text_type, created_at')
-    .order('id', { ascending: false })
-    .limit(before ? 5 : 10);
+    .order('id', { ascending: false }) // cele mai noi 10
+    .limit(10)
 
   if (before) {
     query = query.lt('created_at', before);
