@@ -129,3 +129,5 @@ function grupeazaMesaje(lista) {
   }
   return grupate;
 }
+
+window.trimiteMesaj = trimiteMesaj;
