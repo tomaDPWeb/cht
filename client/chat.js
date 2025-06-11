@@ -18,7 +18,8 @@ async function trimiteMesaj() {
   const mesaj = inputText.value.trim();
   if (!mesaj) return;
 
-  adaugaMesaj("user", mesaj);
+  const now = new Date().toISOString();
+  adaugaMesaj("user", mesaj, now);
   inputText.value = "";
   inputText.style.height = "2.5rem";
   adaugaTyping();
@@ -33,7 +34,8 @@ async function trimiteMesaj() {
 
   const result = await raspuns.json();
   if (result.raspuns) {
-    adaugaMesaj("gpt", result.raspuns);
+    const gptTime = new Date().toISOString();
+    adaugaMesaj("gpt", result.raspuns, gptTime);
   } else {
     adaugaMesaj("gpt", "[Eroare GPT]");
   }
