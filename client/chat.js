@@ -1,5 +1,7 @@
+// ✅ FILE: chat.js
 const chatDisplay = document.getElementById("chatDisplay");
 const inputText = document.getElementById("inputText");
+const zonaButoane = document.getElementById("zonaButoane");
 
 let lastTimestamp = null;
 let loadingOlder = false;
@@ -11,7 +13,7 @@ inputText.addEventListener("input", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   incarcaMesajeInitiale();
-  creeazaButonLoadMore();
+  creeazaButoaneActiune();
 });
 
 async function trimiteMesaj() {
@@ -48,13 +50,12 @@ function adaugaMesaj(autor, text, timestamp = null) {
   if (timestamp) {
     const date = new Date(timestamp);
     const ora = date.toLocaleString([], {
-	  day: '2-digit',
-	  month: '2-digit',
-	  year: 'numeric',
-	  hour: '2-digit',
-	  minute: '2-digit'
-	});
-
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
     mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${text}`;
   } else {
     mesajDiv.textContent = text;
@@ -78,27 +79,17 @@ function stergeTyping() {
   if (typing) typing.remove();
 }
 
-function creeazaButonLoadMore() {
-  const btn = document.createElement("button");
-  btn.textContent = "⬆ Mai vechi";
-  btn.className = "load-more";
-  btn.addEventListener("click", incarcaMesajeVechi);
-  document.body.appendChild(btn);
-}
-
-async function incarcaMesajeInitiale() {
-  const raspuns = await fetch("/api/loadMessages");
-  let data = await raspuns.json();
-
-  // ✅ Inversăm ordinea pentru a afișa în jos 991 → 1000
-  data = data.reverse();
-
-  for (const msg of data) {
-    const autor = msg.text_type === "sent" ? "user" : "gpt";
-    adaugaMesaj(autor, msg.text, msg.created_at);
-  }
-
-  if (data.length > 0) lastTimestamp = data[0].created_at;
+function incarcaMesajeInitiale() {
+  fetch("/api/loadMessages")
+    .then(res => res.json())
+    .then(data => {
+      data = data.reverse();
+      for (const msg of data) {
+        const autor = msg.text_type === "sent" ? "user" : "gpt";
+        adaugaMesaj(autor, msg.text, msg.created_at);
+      }
+      if (data.length > 0) lastTimestamp = data[0].created_at;
+    });
 }
 
 async function incarcaMesajeVechi() {
@@ -108,21 +99,17 @@ async function incarcaMesajeVechi() {
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
   let data = await raspuns.json();
 
-  // ✅ Inversăm datele pentru afișare cronologică
-  //data = data.reverse();
-
   for (const msg of data) {
     const autor = msg.text_type === "sent" ? "user" : "gpt";
     const mesajDiv = document.createElement("div");
     mesajDiv.className = `message ${autor === "user" ? "user-message" : "gpt-message"}`;
     const ora = new Date(msg.created_at).toLocaleString([], {
-	  day: '2-digit',
-	  month: '2-digit',
-	  year: 'numeric',
-	  hour: '2-digit',
-	  minute: '2-digit'
-	});
-
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
     mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${msg.text}`;
     chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
   }
@@ -131,5 +118,21 @@ async function incarcaMesajeVechi() {
   loadingOlder = false;
 }
 
-// Nu mai folosim grupeazaMesaje
+function creeazaButoaneActiune() {
+  const butoane = [
+    { label: "Trimite", id: "btn-trimite", actiune: trimiteMesaj },
+    { label: "⬆ Mai vechi", id: "btn-mai-vechi", actiune: incarcaMesajeVechi },
+    { label: "C", id: "btn-C", actiune: () => {} },
+    { label: "D", id: "btn-D", actiune: () => {} }
+  ];
+
+  for (const btnInfo of butoane) {
+    const btn = document.createElement("button");
+    btn.textContent = btnInfo.label;
+    btn.id = btnInfo.id;
+    btn.addEventListener("click", btnInfo.actiune);
+    zonaButoane.appendChild(btn);
+  }
+}
+
 window.trimiteMesaj = trimiteMesaj;
