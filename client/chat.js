@@ -39,13 +39,22 @@ async function trimiteMesaj() {
   }
 }
 
-function adaugaMesaj(autor, text) {
+function adaugaMesaj(autor, text, timestamp = null) {
   const mesajDiv = document.createElement("div");
   mesajDiv.className = `message ${autor === "user" ? "user-message" : "gpt-message"}`;
-  mesajDiv.textContent = text;
+
+  if (timestamp) {
+    const date = new Date(timestamp);
+    const ora = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${text}`;
+  } else {
+    mesajDiv.textContent = text;
+  }
+
   chatDisplay.appendChild(mesajDiv);
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
+
 
 function adaugaTyping() {
   const typing = document.createElement("div");
@@ -73,12 +82,13 @@ async function incarcaMesajeInitiale() {
   const raspuns = await fetch("/api/loadMessages");
   const data = await raspuns.json();
   const grupate = grupeazaMesaje(data);
-  for (const msg of grupate) {
-    adaugaMesaj(msg.text_type === "sent" ? "user" : "gpt", msg.text);
+
+  for (const grup of grupate) {
+    adaugaMesaj("user", grup.sent.text, grup.sent.created_at);
+    adaugaMesaj("gpt", grup.response.text, grup.response.created_at);
   }
-  if (data.length > 0) {
-    lastTimestamp = data[0].created_at;
-  }
+
+  if (data.length > 0) lastTimestamp = data[0].created_at;
 }
 
 async function incarcaMesajeVechi() {
@@ -87,34 +97,37 @@ async function incarcaMesajeVechi() {
 
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
   const data = await raspuns.json();
-
   const grupate = grupeazaMesaje(data);
+
   for (let i = grupate.length - 1; i >= 0; i--) {
-    const msg = grupate[i];
-    const mesajDiv = document.createElement("div");
-    mesajDiv.className = `message ${msg.text_type === "sent" ? "user-message" : "gpt-message"}`;
-    mesajDiv.textContent = msg.text;
-    chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
+    const grup = grupate[i];
+    const userDiv = document.createElement("div");
+    userDiv.className = "message user-message";
+    userDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${new Date(grup.sent.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>${grup.sent.text}`;
+
+    const gptDiv = document.createElement("div");
+    gptDiv.className = "message gpt-message";
+    gptDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${new Date(grup.response.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>${grup.response.text}`;
+
+    chatDisplay.insertBefore(gptDiv, chatDisplay.firstChild);
+    chatDisplay.insertBefore(userDiv, chatDisplay.firstChild);
   }
 
-  if (data.length > 0) {
-    lastTimestamp = data[0].created_at;
-  }
+  if (data.length > 0) lastTimestamp = data[0].created_at;
   loadingOlder = false;
 }
 
 
+
 function grupeazaMesaje(lista) {
-  const result = [];
-  for (let i = 0; i < lista.length; i += 2) {
-    const a = lista[i], b = lista[i + 1];
-    if (!b) {
-      result.push(a);
-    } else if (a.text_type === "sent") {
-      result.push(a, b);
-    } else {
-      result.push(b, a);
+  const grupate = [];
+  for (let i = 0; i < lista.length - 1; i++) {
+    const cur = lista[i], next = lista[i + 1];
+    if (cur.text_type === "sent" && next.text_type === "response") {
+      grupate.push({ sent: cur, response: next });
+      i++; // skip next
     }
   }
-  return result;
+  return grupate;
 }
+
