@@ -1,7 +1,12 @@
 // ✅ FILE: chat.js
 const chatDisplay = document.getElementById("chatDisplay");
 const inputText = document.getElementById("inputText");
-const zonaButoane = document.getElementById("zonaButoane");
+
+document.addEventListener("DOMContentLoaded", () => {
+  const zonaButoane = document.getElementById("zonaButoane");
+  incarcaMesajeInitiale();
+  creeazaButoaneActiune(zonaButoane);
+});
 
 let lastTimestamp = null;
 let loadingOlder = false;
@@ -118,12 +123,12 @@ async function incarcaMesajeVechi() {
   loadingOlder = false;
 }
 
-function creeazaButoaneActiune() {
+function creeazaButoaneActiune(zonaButoane) {
   const butoane = [
     { label: "Trimite", id: "btn-trimite", actiune: trimiteMesaj },
     { label: "⬆ Mai vechi", id: "btn-mai-vechi", actiune: incarcaMesajeVechi },
     { label: "C", id: "btn-C", actiune: actiuneButonC },
-    { label: "D", id: "btn-D", actiune: actiuneButonD }
+    { label: "D", id: "btn-D", actiune: () => {} }
   ];
 
   for (const btnInfo of butoane) {
@@ -134,7 +139,6 @@ function creeazaButoaneActiune() {
     zonaButoane.appendChild(btn);
   }
 }
-
 
 
 async function actiuneButonC() {
