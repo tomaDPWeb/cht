@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   let query = supabase
     .from('chat_messages')
     .select('id, text, text_type, created_at')
-    .order('id', { ascending: false })
+    .order('id', { ascending: true })
     .limit(before ? 5 : 10);
 
   if (before) {
@@ -25,7 +25,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 
-  const sorted = data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-
-  return res.status(200).json(sorted);
+  return res.status(200).json(data);
 }

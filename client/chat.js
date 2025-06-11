@@ -55,7 +55,6 @@ function adaugaMesaj(autor, text, timestamp = null) {
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-
 function adaugaTyping() {
   const typing = document.createElement("div");
   typing.className = "typing-indicator";
@@ -117,17 +116,14 @@ async function incarcaMesajeVechi() {
   loadingOlder = false;
 }
 
-
-
 function grupeazaMesaje(lista) {
   const grupate = [];
   for (let i = 0; i < lista.length - 1; i++) {
     const cur = lista[i], next = lista[i + 1];
     if (cur.text_type === "sent" && next.text_type === "response") {
       grupate.push({ sent: cur, response: next });
-      i++; // skip next
+      i++; // Skip next
     }
   }
   return grupate;
 }
-
