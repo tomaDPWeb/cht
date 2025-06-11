@@ -84,10 +84,11 @@ async function incarcaMesajeInitiale() {
   const data = await raspuns.json();
   const grupate = grupeazaMesaje(data);
 
-  for (const grup of grupate) {
-    adaugaMesaj("user", grup.sent.text, grup.sent.created_at);
-    adaugaMesaj("gpt", grup.response.text, grup.response.created_at);
-  }
+   for (let i = grupate.length - 1; i >= 0; i--) {
+     const grup = grupate[i];
+     adaugaMesaj("user", grup.sent.text, grup.sent.created_at);
+     adaugaMesaj("gpt", grup.response.text, grup.response.created_at);
+   }
 
   if (data.length > 0) lastTimestamp = data[0].created_at;
 }
