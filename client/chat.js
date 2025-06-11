@@ -33,11 +33,11 @@ async function trimiteMesaj() {
   stergeTyping();
 
   const result = await raspuns.json();
+  const gptTime = new Date().toISOString();
   if (result.raspuns) {
-    const gptTime = new Date().toISOString();
     adaugaMesaj("gpt", result.raspuns, gptTime);
   } else {
-    adaugaMesaj("gpt", "[Eroare GPT]");
+    adaugaMesaj("gpt", "[Eroare GPT]", gptTime);
   }
 }
 
@@ -81,14 +81,17 @@ function creeazaButonLoadMore() {
 
 async function incarcaMesajeInitiale() {
   const raspuns = await fetch("/api/loadMessages");
-  const data = await raspuns.json();
+  let data = await raspuns.json();
+
+  // ✅ Inversăm ordinea pentru a afișa în jos 991 → 1000
+  data = data.reverse();
 
   for (const msg of data) {
     const autor = msg.text_type === "sent" ? "user" : "gpt";
     adaugaMesaj(autor, msg.text, msg.created_at);
   }
 
-  if (data.length > 0) lastTimestamp = data[data.length - 1].created_at;
+  if (data.length > 0) lastTimestamp = data[0].created_at;
 }
 
 async function incarcaMesajeVechi() {
@@ -96,37 +99,23 @@ async function incarcaMesajeVechi() {
   loadingOlder = true;
 
   const raspuns = await fetch(`/api/loadMessages?before=${encodeURIComponent(lastTimestamp)}`);
-  const data = await raspuns.json();
-  const grupate = grupeazaMesaje(data);
+  let data = await raspuns.json();
 
-  for (let i = grupate.length - 1; i >= 0; i--) {
-    const grup = grupate[i];
-    const userDiv = document.createElement("div");
-    userDiv.className = "message user-message";
-    userDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${new Date(grup.sent.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>${grup.sent.text}`;
+  // ✅ La fel, inversăm și aici dacă vine descrescător
+  data = data.reverse();
 
-    const gptDiv = document.createElement("div");
-    gptDiv.className = "message gpt-message";
-    gptDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${new Date(grup.response.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>${grup.response.text}`;
-
-    chatDisplay.insertBefore(gptDiv, chatDisplay.firstChild);
-    chatDisplay.insertBefore(userDiv, chatDisplay.firstChild);
+  for (const msg of data) {
+    const autor = msg.text_type === "sent" ? "user" : "gpt";
+    const mesajDiv = document.createElement("div");
+    mesajDiv.className = `message ${autor === "user" ? "user-message" : "gpt-message"}`;
+    const ora = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    mesajDiv.innerHTML = `<div style="font-size:0.75rem;opacity:0.6;">${ora}</div>${msg.text}`;
+    chatDisplay.insertBefore(mesajDiv, chatDisplay.firstChild);
   }
 
   if (data.length > 0) lastTimestamp = data[0].created_at;
   loadingOlder = false;
 }
 
-function grupeazaMesaje(lista) {
-  const grupate = [];
-  for (let i = 0; i < lista.length - 1; i++) {
-    const cur = lista[i], next = lista[i + 1];
-    if (cur.text_type === "sent" && next.text_type === "response") {
-      grupate.push({ sent: cur, response: next });
-      i++; // Skip next
-    }
-  }
-  return grupate;
-}
-
+// Nu mai folosim grupeazaMesaje
 window.trimiteMesaj = trimiteMesaj;
